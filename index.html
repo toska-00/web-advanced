@@ -2,68 +2,123 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Web高级开发实践题库</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1f6feb">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="移动跨平台刷题">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <title>移动跨平台题目检验</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <p class="eyebrow">Web高级开发实践</p>
-      <h1>复习测试题库</h1>
-    </div>
-    <img src="./assets/study-board.png" alt="" class="study-art">
-  </header>
-
   <main class="app-shell">
-    <aside class="panel controls-panel">
-      <label class="field-label" for="setFilter">套题</label>
-      <select id="setFilter"></select>
-
-      <label class="field-label" for="typeFilter">题型</label>
-      <select id="typeFilter"></select>
-
-      <label class="field-label" for="searchInput">搜索</label>
-      <input id="searchInput" type="search" placeholder="输入关键词">
-
-      <div class="field-label">顺序</div>
-      <div class="segmented" role="group" aria-label="练习顺序">
-        <button class="segment active" data-mode="ordered" type="button">顺序</button>
-        <button class="segment" data-mode="random" type="button">随机</button>
-        <button class="segment" data-mode="missed" type="button">错题</button>
+    <section class="topbar" aria-label="题库概览">
+      <div>
+        <p class="eyebrow">移动跨平台</p>
+        <h1>刷题检验</h1>
       </div>
-
-      <div class="stats-grid">
-        <div><span id="totalCount">0</span><small>总题数</small></div>
-        <div><span id="doneCount">0</span><small>已完成</small></div>
-        <div><span id="rightCount">0</span><small>正确</small></div>
-        <div><span id="accuracy">0%</span><small>正确率</small></div>
+      <div class="score-strip">
+        <div>
+          <span id="statTotal">217</span>
+          <small>题库</small>
+        </div>
+        <div>
+          <span id="statDone">0</span>
+          <small>已答</small>
+        </div>
+        <div>
+          <span id="statAccuracy">0%</span>
+          <small>正确率</small>
+        </div>
       </div>
+    </section>
 
-      <div class="progress-track"><div id="progressBar"></div></div>
+    <section class="workspace">
+      <aside class="control-panel" aria-label="练习设置">
+        <div class="settings-grid">
+          <div class="panel-block">
+            <label for="modeSelect">模式</label>
+            <select id="modeSelect">
+              <option value="random">随机练习</option>
+              <option value="order">顺序练习</option>
+              <option value="wrong">错题复练</option>
+            </select>
+          </div>
 
-      <div id="questionNav" class="question-nav" aria-label="题目列表"></div>
-    </aside>
+          <div class="panel-block">
+            <label for="typeSelect">题型</label>
+            <select id="typeSelect">
+              <option value="all">全部题型</option>
+              <option value="single">单选题</option>
+              <option value="multiple">多选题</option>
+              <option value="judge">判断题</option>
+              <option value="fill">填空题</option>
+              <option value="short">简答题</option>
+            </select>
+          </div>
 
-    <section class="panel question-panel">
-      <div class="question-meta">
-        <span id="metaSet"></span>
-        <span id="metaType"></span>
-      </div>
-      <h2 id="questionTitle"></h2>
-      <div id="answerArea" class="answer-area"></div>
-      <div id="feedback" class="feedback" hidden></div>
-      <div id="analysisBox" class="analysis-box" hidden></div>
-      <div class="actions">
-        <button id="prevBtn" type="button">上一题</button>
-        <button id="checkBtn" class="primary" type="button">确认答案</button>
-        <button id="markBtn" type="button">标记</button>
-        <button id="nextBtn" type="button">下一题</button>
-      </div>
+          <div class="panel-block">
+            <label for="amountInput">题量</label>
+            <input id="amountInput" type="number" min="1" max="217" value="20">
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="startBtn" class="primary-btn" type="button">开始</button>
+          <button id="resetBtn" class="ghost-btn danger-btn" type="button">清空记录</button>
+        </div>
+
+        <div class="panel-block compact">
+          <span>本轮</span>
+          <strong id="roundInfo">0 / 0</strong>
+        </div>
+        <div class="panel-block compact">
+          <span>错题</span>
+          <strong id="wrongInfo">0</strong>
+        </div>
+
+        <details class="sync-panel">
+          <summary>手机 / iPad 同步</summary>
+          <div class="sync-actions">
+            <button id="exportBtn" class="ghost-btn" type="button">导出同步码</button>
+            <button id="importBtn" class="ghost-btn" type="button">导入同步码</button>
+          </div>
+          <textarea id="syncText" rows="4" placeholder="这里会显示同步码；在另一台设备粘贴后点导入"></textarea>
+          <p id="syncStatus" class="sync-status">同步码可跨网络复制，不要求同一个局域网。</p>
+        </details>
+      </aside>
+
+      <section class="quiz-panel" aria-live="polite">
+        <div class="question-head">
+          <div>
+            <span id="sourceBadge" class="badge">未开始</span>
+            <span id="typeBadge" class="badge muted">题型</span>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <span id="progressBar"></span>
+          </div>
+        </div>
+
+        <article class="question-area">
+          <p id="questionMeta" class="question-meta">选择模式后开始练习</p>
+          <h2 id="questionText">准备好了就开刷。</h2>
+          <div id="answerArea" class="answer-area"></div>
+          <div id="feedbackBox" class="feedback hidden"></div>
+        </article>
+
+        <div class="action-bar">
+          <button id="prevBtn" class="ghost-btn" type="button">上一题</button>
+          <button id="checkBtn" class="primary-btn" type="button">提交</button>
+          <button id="answerBtn" class="ghost-btn" type="button">答案</button>
+          <button id="nextBtn" class="ghost-btn" type="button">下一题</button>
+        </div>
+      </section>
     </section>
   </main>
 
   <script src="./questions.js"></script>
-  <script src="./script.js"></script>
+  <script src="./short-fill-pdf-answers.js"></script>
+  <script src="./pdf-answers.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
